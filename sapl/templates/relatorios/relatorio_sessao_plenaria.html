@@ -1,0 +1,82 @@
+{% load static %}
+<!DOCTYPE html>
+<meta charset="utf-8">
+</meta>
+<html lang="pt-br">
+
+<head>
+    <link rel="stylesheet" href="{% static "css/print-style.css" %}" type="text/css"/>
+
+    <style>
+        @page chapter {
+            background: #fbc847;
+            margin: 0;
+            @top-left {
+                content: none; }
+             @top-center {
+                 content: none; }
+            @top-right {
+            content: none; } 
+        }
+    
+    </style>
+</head>
+
+<body>
+    <table class="report-container">
+
+        <thead class="report-header">
+            <th>
+                <div class="grid-container-header">
+                    <img class="header-image" src="logo.png" alt="">
+                    <h1 class="header-title1">Câmara Municipal de Agudo</h1>
+                    <h2 class="header-title2">Sistema de Apoio ao Processo Legislativo</h2>
+                    <h3 class="header-title3">Resumo da 29a Reunião Extraordinária da 3a Sessão Legislativa da
+                        15a (2017 - 2020) (Atual) Legislatura</h2>
+                </div>
+            </th>
+            </tr>
+        </thead>
+
+        <tbody class="report-content">
+            <tr>
+                <td>
+
+                    <h2 class="report-title">Informações Básicas</h2>
+                    <h2 class="report-title">Mesa Diretora</h2>
+                    <h2 class="report-title">Lista de Presença da Sessão</h2>
+                    <h2 class="report-title">Justificativas de Ausência da Sessão</h2>
+                    <h2 class="report-title">Expedientes</h2>
+                    <h2 class="report-title">Oradores do Expediente</h2>
+                    <h2 class="report-title">Lista de Presença da Ordem do Dia</h2>
+                    <h2 class="report-title">Matérias da Ordem do Dia</h2>
+                    <h2 class="report-title">Matérias do Expediente</h2>
+                    <h2 class="report-title">Oradores das Explicações Pessoais</h2>
+                    <h2 class="report-title">Ocorrências da Sessão</h2>
+                    
+
+                </td>
+            </tr>
+
+        </tbody>
+
+        <tfoot style="page-break-after: always;" class="report-footer">
+            <tr>
+                <td>
+                    <div class="grid-container-footer">
+
+                        <p class="page"></p>
+                        <div class=space></div>
+                        <div class="line"></div>
+                        <p id="date"class="footer-date">08/02/2019</p>
+                        <h5 class="footer-info">Rua Theodoro Woldt, 400 - Agudo RS Tel.: (55) 3265-1162
+                                http://www.agudo.rs.leg.br - E-mail: camara@agudo.rs.leg.br</h3>
+                    </div>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</body>
+
+
+</html>

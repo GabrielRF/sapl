@@ -2,11 +2,13 @@ from datetime import datetime as dt
 import html
 import logging
 import re
+import tempfile
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404, HttpResponse
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+from django.template.loader import render_to_string
 
 from sapl.base.models import Autor, CasaLegislativa
 from sapl.comissoes.models import Comissao
@@ -29,6 +31,7 @@ from .templates import (pdf_capa_processo_gerar,
                         pdf_ordem_dia_gerar, pdf_pauta_sessao_gerar,
                         pdf_protocolo_gerar, pdf_sessao_plenaria_gerar)
 
+from weasyprint import HTML, CSS
 
 def get_kwargs_params(request, fields):
     kwargs = {}
@@ -852,6 +855,58 @@ def relatorio_sessao_plenaria(request, pk):
     response.write(pdf)
     return response
 
+def relatorio_sessao_plenaria_pdf(request, pk):
+    from django.shortcuts import render
+    '''
+        pdf_sessao_plenaria_gerar.py
+    '''
+    logger = logging.getLogger(__name__)
+    username = request.user.username
+    casa = CasaLegislativa.objects.first()
+    if not casa:
+        raise Http404
+    try:
+        logger.debug("user=" + username +
+                     ". Tentando obter SessaoPlenaria com id={}.".format(pk))
+        sessao = SessaoPlenaria.objects.get(id=pk)
+    except ObjectDoesNotExist as e:
+        logger.error("user=" + username +
+                     ". Essa SessaoPlenaria não existe (pk={}). ".format(pk) + str(e))
+        raise Http404('Essa página não existe')
+    (inf_basicas_dic,
+     lst_mesa,
+     lst_presenca_sessao,
+     lst_ausencia_sessao,
+     lst_expedientes,
+     lst_expediente_materia,
+     lst_oradores_expediente,
+     lst_presenca_ordem_dia,
+     lst_votacao,
+     lst_oradores,
+     lst_ocorrencias) = get_sessao_plenaria(sessao, casa)
+    
+    html_template = render_to_string('relatorios/relatorio_sessao_plenaria.html')
+
+
+    
+
+    pdf_file = HTML(string=html_template).write_pdf()
+
+    
+    response = HttpResponse(content_type='application/pdf;')
+    response['Content-Disposition'] = 'inline; filename=relatorio.pdf'
+    response['Content-Transfer-Encoding'] = 'binary'
+    with tempfile.NamedTemporaryFile(delete=True) as output:
+        output.write(pdf_file)
+        output.flush()
+        output = open(output.name, 'rb')
+        response.write(output.read())
+
+    return response
+    
+
+    #return render(request, 'relatorios/relatorio_sessao_plenaria.html')
+    
 
 def get_protocolos(prots):
 

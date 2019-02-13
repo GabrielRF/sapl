@@ -1,0 +1,120 @@
+
+/*@media print {*/
+
+    @page chapter {
+        background: #fbc847;
+        margin: 0;
+        @top-left {
+          content: none; }
+        @top-center {
+          content: none; }
+        @top-right {
+      content: none; } }
+    
+    nav, footer, video, audio, object, embed {
+        display: none;
+    }
+
+    img {
+        max-width: 100px;
+    }
+
+    @page :left {
+        margin: 0.8cm;
+    }
+        
+    @page :right {
+        margin: 0.8cm;
+    }
+
+    body {
+        font: 12pt Georgia, "Times New Roman", Times, serif;
+        line-height: 1.3;
+    }
+
+    p {
+        orphans: 5;
+    }
+
+    table.report-container {
+        page-break-after:always;
+    }
+
+    thead.report-header {
+        display:table-header-group;
+    }
+
+    tfoot.report-footer {
+        display:table-footer-group;
+    } 
+        
+    h1.header-title1 {
+        grid-area: main;
+        grid-template-columns: auto;
+        height: 5px;
+
+    }
+    h2.header-title2 {
+        grid-area: middle;
+        font-weight: normal;
+        line-break: strict;
+        grid-template-columns: auto;
+        height: 0px;
+
+    }
+
+    h3.header-title3 {
+        grid-area: down;
+        border-top: 3px solid black;
+    }
+
+    img.header-image {
+        grid-area: menu;
+    }
+    .grid-container-header {
+        display: grid;
+        grid-template-areas:
+          'menu main main main main main main'
+          'menu middle middle middle middle middle middle'
+          'down down down down down down down';
+    }
+
+    p.footer-date {
+        grid-area: top-right;
+    }
+
+    p.page:after{
+        grid-area: top-left;
+        counter-increment: page;
+        content: counter(page);
+    }
+
+    div.space{
+        grid-area: space;
+        content: "  ";
+    }
+
+    div.line{
+        grid-area: line;
+        border-bottom: 3px solid black;
+    }
+
+    h5.footer-info {
+        grid-area: botton;
+        font-weight: normal;
+    }
+
+    .grid-container-footer {
+        display: grid;
+        grid-template-areas:
+          'top-left space space space space top-right'
+          'line line line line line line'
+          'botton botton botton botton botton botton';
+    }
+
+    h2.report-title {
+        -webkit-print-color-adjust: exact;
+        color:#aaa;
+    }
+ /*}*/
+
