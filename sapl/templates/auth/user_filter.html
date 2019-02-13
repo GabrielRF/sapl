@@ -5,9 +5,7 @@
 {% block base_content %}
 	{% if not show_results %}
 		{% crispy filter.form %}
-		<div class="actions btn-group float-left" role="group">
-			<a href="{% url 'sapl.base:user_create' %}" class="btn btn-outline-primary">{% trans 'Criar usuário' %}</a>
-    </div>
+		<a href="{% url 'sapl.base:user_create' %}" class="btn btn-outline-primary">{% trans 'Criar usuário' %}</a>
   {% endif %}
 
 	{% if show_results %}

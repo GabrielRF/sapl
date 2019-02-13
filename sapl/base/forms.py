@@ -112,8 +112,6 @@ class UsuarioCreateForm(ModelForm):
             [('password1', 6),
              ('password2', 6)])
 
-        row4 = to_row([(form_actions(label='Confirmar'), 6)])
-
         self.helper = FormHelper()
         self.helper.layout = Layout(
             row0,
@@ -121,7 +119,7 @@ class UsuarioCreateForm(ModelForm):
             row3,
             row2,
             'roles',
-            row4)
+            form_actions(label='Confirmar'))
 
 
 class UsuarioFilterSet(django_filters.FilterSet):
@@ -183,7 +181,7 @@ class UsuarioEditForm(ModelForm):
             row1,
             row2,
             'roles',
-            row3)
+            form_actions(label='Salvar Alterações'))
 
     def clean(self):
         super(UsuarioEditForm, self).clean()

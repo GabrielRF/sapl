@@ -5,10 +5,11 @@
 
     <form action="" method="post">
         {% csrf_token %}
-        {%  crispy form %}
         {% if object.pk %}
-            <a class="btn btn-warning" href="{% url 'sapl.base:user_delete' object.pk %}">Remover usuário</a>
+            <a href="{% url 'sapl.base:user_delete' object.pk %}" class="btn btn-warning float-right">{% trans 'Remover usuário' %}</a>
+            <br /> <br />
         {% endif %}
+        {%  crispy form %}
     </form>
-
+	<br /><br /><br />
 {% endblock base_content %}
