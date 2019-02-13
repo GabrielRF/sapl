@@ -124,6 +124,30 @@ class UsuarioCreateForm(ModelForm):
             row4)
 
 
+class UsuarioFilterSet(django_filters.FilterSet):
+    
+    username = django_filters.CharFilter(
+        label=_('Nome de Usuário'), 
+        lookup_expr='icontains')
+
+    class Meta:
+        model = User
+        fields = ['username']
+
+    def __init__(self, *args, **kwargs):
+        super(UsuarioFilterSet, self).__init__(*args, **kwargs)
+
+        row0 = to_row([('username', 12)])
+        
+        self.form.helper = FormHelper()
+        self.form.helper.form_method = 'GET'
+        self.form.helper.layout = Layout(
+            Fieldset(_('Pesquisa de Usuário'),
+                     row0,
+                     form_actions(label='Pesquisar'))
+        )
+
+
 class UsuarioEditForm(ModelForm):
     logger = logging.getLogger(__name__)
     # ROLES = [(g.id, g.name) for g in Group.objects.all().order_by('name')]

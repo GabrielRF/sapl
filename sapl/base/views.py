@@ -5,7 +5,7 @@ import os
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import PermissionRequiredMixin
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, User
 from django.contrib.auth.tokens import default_token_generator
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.core.mail import send_mail
@@ -52,7 +52,7 @@ from .forms import (AlterarSenhaForm, CasaLegislativaForm,
                     RelatorioReuniaoFilterSet, UsuarioCreateForm,
                     UsuarioEditForm, RelatorioNormasMesFilterSet,
                     RelatorioNormasVigenciaFilterSet,
-                    EstatisticasAcessoNormasForm)
+                    EstatisticasAcessoNormasForm, UsuarioFilterSet)
 from .models import AppConfig, CasaLegislativa
 
 
@@ -915,25 +915,63 @@ class EstatisticasAcessoNormas(TemplateView):
         return self.render_to_response(context)
 
 
-class ListarUsuarioView(PermissionRequiredMixin, ListView):
-    model = get_user_model()
-    template_name = 'auth/user_list.html'
-    context_object_name = 'user_list'
+class PesquisarUsuarioView(PermissionRequiredMixin, FilterView):
+    model = User
+    filterset_class = UsuarioFilterSet
     permission_required = ('base.list_appconfig',)
     paginate_by = 10
 
-    def get_queryset(self):
-        qs = super(ListarUsuarioView, self).get_queryset()
-        return qs.order_by('username')
+    def get_filterset_kwargs(self, filterset_class):
+        super(PesquisarUsuarioView,
+              self).get_filterset_kwargs(filterset_class)
+
+        kwargs = {'data': self.request.GET or None}
+
+        qs = self.get_queryset().order_by('username').distinct()
+
+        kwargs.update({
+            'queryset': qs,
+        })
+        return kwargs
 
     def get_context_data(self, **kwargs):
-        context = super(ListarUsuarioView, self).get_context_data(**kwargs)
+        context = super(PesquisarUsuarioView,
+                        self).get_context_data(**kwargs)
+
         paginator = context['paginator']
         page_obj = context['page_obj']
+
         context['page_range'] = make_pagination(
             page_obj.number, paginator.num_pages)
-        context['NO_ENTRIES_MSG'] = 'Nenhum usuário cadastrado.'
+        
+        context['NO_ENTRIES_MSG'] = 'Nenhum usuário encontrado!'
+        
+        context['title'] = _('Usuários')
+
         return context
+
+    def get(self, request, *args, **kwargs):
+        super(PesquisarUsuarioView, self).get(request)
+
+        data = self.filterset.data
+        if data is not None:
+            url = "&" + str(self.request.environ['QUERY_STRING'])
+            if url.startswith("&page"):
+                ponto_comeco = url.find('username=') - 1
+                url = url[ponto_comeco:]
+        else:
+            url = ''
+
+        context = self.get_context_data(filter=self.filterset,
+                                        object_list=self.object_list,
+                                        filter_url=url,
+                                        numero_res=len(self.object_list)
+                                        )
+
+        context['show_results'] = show_results_filter_set(
+            self.request.GET.copy())
+
+        return self.render_to_response(context)
 
 
 class CreateUsuarioView(PermissionRequiredMixin, CreateView):
@@ -943,7 +981,7 @@ class CreateUsuarioView(PermissionRequiredMixin, CreateView):
     permission_required = ('base.add_appconfig',)
 
     def get_success_url(self):
-        return reverse('sapl.base:user_list')
+        return reverse('sapl.base:usuario')
 
     def form_valid(self, form):
 
@@ -971,7 +1009,7 @@ class DeleteUsuarioView(PermissionRequiredMixin, DeleteView):
     permission_required = ('base.delete_appconfig',)
 
     def get_success_url(self):
-        return reverse('sapl.base:user_list')
+        return reverse('sapl.base:usuario')
 
     def get(self, request, *args, **kwargs):
         return self.post(request, *args, **kwargs)
@@ -988,7 +1026,7 @@ class EditUsuarioView(PermissionRequiredMixin, UpdateView):
     permission_required = ('base.change_appconfig',)
 
     def get_success_url(self):
-        return reverse('sapl.base:user_list')
+        return reverse('sapl.base:usuario')
 
     def get_initial(self):
         initial = super(EditUsuarioView, self).get_initial()
