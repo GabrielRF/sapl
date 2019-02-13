@@ -22,7 +22,7 @@ from sapl.sessao.models import (ExpedienteMateria, ExpedienteSessao,
                                 Orador, OradorExpediente,
                                 OrdemDia, PresencaOrdemDia, SessaoPlenaria,
                                 SessaoPlenariaPresenca, OcorrenciaSessao)
-from sapl.settings import STATIC_ROOT
+from sapl.settings import STATIC_ROOT, STATIC_URL
 from sapl.utils import LISTA_DE_UFS, TrocaTag, filiacao_data
 
 from .templates import (pdf_capa_processo_gerar,
@@ -32,6 +32,8 @@ from .templates import (pdf_capa_processo_gerar,
                         pdf_protocolo_gerar, pdf_sessao_plenaria_gerar)
 
 from weasyprint import HTML, CSS
+
+from sapl.settings import MEDIA_URL
 
 def get_kwargs_params(request, fields):
     kwargs = {}
@@ -857,14 +859,22 @@ def relatorio_sessao_plenaria(request, pk):
 
 def relatorio_sessao_plenaria_pdf(request, pk):
     from django.shortcuts import render
-    '''
-        pdf_sessao_plenaria_gerar.py
-    '''
+   
     logger = logging.getLogger(__name__)
     username = request.user.username
     casa = CasaLegislativa.objects.first()
     if not casa:
         raise Http404
+    rodape = get_rodape(casa)
+    
+    #get image
+    if casa.logotipo:
+        imagem =  casa.logotipo.path
+        imagem = "/media/sapl/public/casa/logotipo/" + imagem.split('/')[-1]
+
+    else:
+        imagem = STATIC_URL + '/img/logo.png'
+
     try:
         logger.debug("user=" + username +
                      ". Tentando obter SessaoPlenaria com id={}.".format(pk))
@@ -885,13 +895,72 @@ def relatorio_sessao_plenaria_pdf(request, pk):
      lst_oradores,
      lst_ocorrencias) = get_sessao_plenaria(sessao, casa)
     
-    html_template = render_to_string('relatorios/relatorio_sessao_plenaria.html')
+    html_template = render_to_string('relatorios/relatorio_sessao_plenaria.html',
+    {
+        "inf_basicas_dic":inf_basicas_dic,
+        "lst_mesa":lst_mesa,
+        "lst_presenca_sessao":lst_presenca_sessao,
+        "lst_ausencia_sessao":lst_ausencia_sessao,
+        "lst_expedientes":lst_expedientes,
+        "lst_expediente_materia":lst_expediente_materia,
+        "lst_oradores_expediente":lst_oradores_expediente,
+        "lst_presenca_ordem_dia":lst_presenca_ordem_dia,
+        "lst_votacao":lst_votacao,
+        "lst_oradores":lst_oradores,
+        "lst_ocorrencias":lst_ocorrencias,
+        "rodape":rodape[0]
+    })
+
+    html_header = render_to_string('relatorios/header.html',{"info":inf_basicas_dic, "imagem":imagem})
+
+    html_footer = render_to_string('relatorios/footer.html')
 
 
-    
+    def get_page_body(boxes):
+        for box in boxes:
+            if box.element_tag == 'body':
+                return box
 
-    pdf_file = HTML(string=html_template).write_pdf()
+            return get_page_body(box.all_children())
 
+
+    # Main template
+    html = HTML(string=html_template)
+    main_doc = html.render()
+    exists_links = False
+
+    # Template of header
+    html = HTML(string=html_header)
+    header = html.render(stylesheets=[CSS(string='div {position: fixed; top: 0cm; left: 1cm;}')])
+
+    header_page = header.pages[0]
+    exists_links = exists_links or header_page.links
+    header_body = get_page_body(header_page._page_box.all_children())
+    header_body = header_body.copy_with_children(header_body.all_children())
+
+    # Template of footer
+    html = HTML(string=html_footer)
+    footer = html.render(stylesheets=[CSS(string='div {position: fixed; bottom: 1cm; left: 1cm;}')])
+
+    footer_page = footer.pages[0]
+    exists_links = exists_links or footer_page.links
+    footer_body = get_page_body(footer_page._page_box.all_children())
+    footer_body = footer_body.copy_with_children(footer_body.all_children())
+
+
+    # Insert header and footer in main doc
+    for i, page in enumerate(main_doc.pages):
+
+        page_body = get_page_body(page._page_box.all_children())
+
+        page_body.children += header_body.all_children()
+        page_body.children += footer_body.all_children()
+
+        if exists_links:
+            page.links.extend(header_page.links)
+            page.links.extend(footer_page.links)
+
+    pdf_file = main_doc.write_pdf()
     
     response = HttpResponse(content_type='application/pdf;')
     response['Content-Disposition'] = 'inline; filename=relatorio.pdf'
@@ -905,7 +974,6 @@ def relatorio_sessao_plenaria_pdf(request, pk):
     return response
     
 
-    #return render(request, 'relatorios/relatorio_sessao_plenaria.html')
     
 
 def get_protocolos(prots):

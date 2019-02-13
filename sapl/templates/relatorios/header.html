@@ -1,0 +1,73 @@
+{% load i18n staticfiles menus %}
+{% load common_tags %}
+{% load render_bundle from webpack_loader %}
+{% load webpack_static from webpack_loader %}
+<!DOCTYPE html>
+<meta charset="utf-8">
+</meta>
+<html lang="pt-br">
+
+<head>
+    <style>
+        html body h4 {
+            border-top: 3px solid black;
+            text-align: center;
+            font-size: 9pt;
+            font-weight: ligther;
+        }
+
+        html body section {
+            box-sizing: border-box;
+        }
+
+        html body section dl {
+            display: flex;
+            flex-wrap: wrap;
+            rows: 2;
+            columns: 2;
+        }
+
+        html body section dt{
+            width: 50px;
+        }
+
+        html body section dd {
+            text-align: center;
+        }
+
+        html body section dd ul li {
+            list-style-type: none;
+            margin-left: 50px;
+        }
+
+        h3 {
+            font-size: 12pt;
+        }
+    </style>
+</head>
+
+<body>
+    <section id="informations">
+       
+        <dl>
+            <dt class="image-header"> 
+                <img src="{{ imagem }}"
+                alt="Logo" >
+            </dt>
+            <dd class="title">
+                <ul>
+                    <li><h1>{{ info.nom_camara }}</h1></li>
+                    <li><h3>Sistema de Apoio ao Processo Legislativo</h3></li>
+                </ul>
+            </dd>
+        </dl>
+      
+
+    </section>
+    <h4>Resumo da {{ info.num_sessao_plen }} Reunião {{nom_sessao}} da {{ info.num_sessao_leg}} Sessão Legislativa da
+            {{info.num_legislatura}} Legislatura</h4>
+
+</body>
+
+
+</html>

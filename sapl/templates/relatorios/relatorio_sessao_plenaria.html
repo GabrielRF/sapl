@@ -1,81 +1,145 @@
-{% load static %}
 <!DOCTYPE html>
 <meta charset="utf-8">
 </meta>
 <html lang="pt-br">
 
 <head>
-    <link rel="stylesheet" href="{% static "css/print-style.css" %}" type="text/css"/>
-
     <style>
-        @page chapter {
-            background: #fbc847;
-            margin: 0;
-            @top-left {
-                content: none; }
-             @top-center {
-                 content: none; }
-            @top-right {
-            content: none; } 
-        }
+        @page{
+            margin-top: 7.5cm;
     
+            @bottom-left {
+                content: counter(page);
+                height: 1cm;
+                text-align: center;
+                width: 1cm;
+            }
+
+            @bottom-right {
+                content: "02/02/2019";
+                height: 1cm;
+                hext-align: center;
+                hidth: 1cm;
+            }
+
+            @bottom-center {
+                border-top: 1px solid black;
+                font-size: 9pt;
+                content: "{{rodape}}";
+                height: 1cm;
+                hext-align: center;
+                hidth: 1cm;
+            }
+    } 
+        h2.gray-title{
+            color: gray;
+            font-size: 14pt;
+        }
+
+        p {
+            font-size: 10pt; 
+        }
+
+        table.blueTable {
+            border: 1px solid #1C6EA4;
+            background-color: #EEEEEE;
+            width: 100%;
+            text-align: left;
+            border-collapse: collapse;
+        }
+        table.blueTable td, table.blueTable th {
+            border: 1px solid #AAAAAA;
+            padding: 3px 2px;
+        }
+        table.blueTable tbody td {
+            font-size: 13px;
+        }
+        table.blueTable tr:nth-child(even) {
+            background: #D0E4F5;
+        }
+        table.blueTable thead {
+            background: #1C6EA4;
+            background: -moz-linear-gradient(top, #5592bb 0%, #327cad 66%, #1C6EA4 100%);
+            background: -webkit-linear-gradient(top, #5592bb 0%, #327cad 66%, #1C6EA4 100%);
+            background: linear-gradient(to bottom, #5592bb 0%, #327cad 66%, #1C6EA4 100%);
+            border-bottom: 2px solid #444444;
+        }
+        table.blueTable thead th {
+            font-size: 15px;
+            font-weight: bold;
+            color: #FFFFFF;
+            border-left: 2px solid #D0E4F5;
+        }
+        table.blueTable thead th:first-child {
+            border-left: none;
+        }
+
     </style>
 </head>
 
 <body>
-    <table class="report-container">
+    <div style="margin-bottom: 3cm">
+        <h2 class="gray-title">Informações Básicas</h2>
+        <p><b>Tipo da Sessão:</b> {{inf_basicas_dic.nom_sessao}}</p>
+        <p><b>Abertura:</b> {{inf_basicas_dic.dat_inicio_sessao}} - {{inf_basicas_dic.hr_inicio_sessao}}</p>
+        <p><b>Encerramento:</b> {{inf_basicas_dic.dat_fim_sessao}} - {{inf_basicas_dic.hr_fim_sessao}}</p>
 
-        <thead class="report-header">
-            <th>
-                <div class="grid-container-header">
-                    <img class="header-image" src="logo.png" alt="">
-                    <h1 class="header-title1">Câmara Municipal de Agudo</h1>
-                    <h2 class="header-title2">Sistema de Apoio ao Processo Legislativo</h2>
-                    <h3 class="header-title3">Resumo da 29a Reunião Extraordinária da 3a Sessão Legislativa da
-                        15a (2017 - 2020) (Atual) Legislatura</h2>
-                </div>
-            </th>
+        <h2 class="gray-title">Mesa Diretora</h2>
+        {% for membro in lst_mesa%}
+            <p><b>{{membro.des_cargo}}:</b> {{membro.nom_parlamentar}}/{{membro.sgl_partido}}</p>
+        {% endfor%}
+
+        <h2 class="gray-title">Lista de Presença da Sessão</h2>
+        {% for membro in lst_presenca_sessao%}
+            <p>{{membro.nom_parlamentar}}/{{membro.sgl_partido}}</p>
+        {% endfor%}
+        
+        <h2 class="gray-title">Justificativas de Ausência da Sessão</h2>
+
+        <h2 class="gray-title">Expedientes</h2>
+        {% for expediente in lst_expedientes%}
+            <div style='page-break-inside: avoid'>
+                <p><b>{{expediente.nom_expediente}}</b></p>
+                <p>{{expediente.txt_expediente|safe}}</p>
+            </div>
+        {% endfor%}
+            
+
+        <h2 class="gray-title">Matérias do Expediente</h2>
+     
+    <table class="blueTable" style="height: 145px;" width="443">
+        <thead>
+            <tr>
+                <th>Matéria</th>
+                <th>Ementa</th>
+                <th>Resultado da Votação</th>
             </tr>
         </thead>
-
-        <tbody class="report-content">
-            <tr>
-                <td>
-
-                    <h2 class="report-title">Informações Básicas</h2>
-                    <h2 class="report-title">Mesa Diretora</h2>
-                    <h2 class="report-title">Lista de Presença da Sessão</h2>
-                    <h2 class="report-title">Justificativas de Ausência da Sessão</h2>
-                    <h2 class="report-title">Expedientes</h2>
-                    <h2 class="report-title">Oradores do Expediente</h2>
-                    <h2 class="report-title">Lista de Presença da Ordem do Dia</h2>
-                    <h2 class="report-title">Matérias da Ordem do Dia</h2>
-                    <h2 class="report-title">Matérias do Expediente</h2>
-                    <h2 class="report-title">Oradores das Explicações Pessoais</h2>
-                    <h2 class="report-title">Ocorrências da Sessão</h2>
-                    
-
-                </td>
-            </tr>
-
+        <tbody>
+            {% for materia in lst_expediente_materia%}
+                <tr>
+                    <td>{{materia.id_materia}}</td>
+                    <td>{{materia.txt_ementa}}</td>
+                    <td>{{materia.nom_resultado}}</td>
+                </tr>
+            {% endfor %}
+           
         </tbody>
-
-        <tfoot style="page-break-after: always;" class="report-footer">
-            <tr>
-                <td>
-                    <div class="grid-container-footer">
-
-                        <p class="page"></p>
-                        <div class=space></div>
-                        <div class="line"></div>
-                        <p id="date"class="footer-date">08/02/2019</p>
-                        <h5 class="footer-info">Rua Theodoro Woldt, 400 - Agudo RS Tel.: (55) 3265-1162
-                                http://www.agudo.rs.leg.br - E-mail: camara@agudo.rs.leg.br</h3>
-                    </div>
-                </td>
-            </tr>
-        </tfoot>
     </table>
+        
+        <h2 class="gray-title">Oradores do Expediente</h2>
+        
+        <h2 class="gray-title">Lista de Presença da Ordem do Dia</h2>
+        
+        <h2 class="gray-title">Matérias da Ordem do Dia</h2>
+        
+        <h2 class="gray-title">Oradores das Explicações Pessoais</h2>
+        
+        <h2 class="gray-title">Ocorrências da Sessão</h2>
+    
+    
+        </div>
+
 </body>
 
 
